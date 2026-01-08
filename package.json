@@ -1,0 +1,15 @@
+{
+  "name": "writer-platform",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "packages/plugins/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w apps/writer-web",
+    "build": "npm run build -ws",
+    "typecheck": "npm run typecheck -ws",
+    "clean": "npm run clean -ws"
+  }
+}

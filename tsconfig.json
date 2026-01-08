@@ -1,0 +1,11 @@
+{
+  "files": [],
+  "references": [
+    { "path": "packages/plugin-api" },
+    { "path": "packages/plugin-runtime" },
+    { "path": "packages/plugin-host" },
+    { "path": "packages/plugins/outline" },
+    { "path": "packages/plugins/stats" },
+    { "path": "apps/writer-web" }
+  ]
+}
