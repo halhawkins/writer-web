@@ -38,7 +38,7 @@ No editor, persistence, or styling yet — this is intentional.
 ---
 
 ## Repository Structure
-
+```
 writer-platform/
 ├─ apps/
 │ └─ writer-web/ # Vite React application
@@ -55,7 +55,7 @@ writer-platform/
 ├─ package.json # npm workspaces
 └─ README.md
 
-
+```
 ---
 
 ## Architectural Overview
