@@ -3,6 +3,7 @@ import { PluginRuntime } from "@writer/plugin-runtime";
 import { PluginHost } from "@writer/plugin-host";
 import type { AppApi } from "@writer/plugin-api";
 import { plugin as outline } from "@writer/plugins-outline";
+import { plugin as statsPlugin } from "@writer/plugins-stats";
 import './App.css';
 
 function createAppApi(): AppApi {
@@ -16,14 +17,10 @@ function createAppApi(): AppApi {
     },
     documents: {
       async list() { return []; },
-      async open() {},
-      async save() {},
       getCurrent() { return null; }
     },
     editor: {
       getText() { return ""; },
-      setText() {},
-      insertText() {}
     },
     storage: {
       async get(_k, fallback) { return fallback; },
@@ -41,6 +38,7 @@ export default function App() {
   const runtime = React.useMemo(() => {
     const r = new PluginRuntime(api);
     r.registerModule(outline);
+    r.registerModule(statsPlugin)
     r.rebuild();
     return r;
   }, [api]);

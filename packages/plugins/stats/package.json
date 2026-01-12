@@ -1,0 +1,14 @@
+{
+  "name": "@writer/plugins-stats",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "main": "src/index.tsx",
+  "exports": {
+    ".": "./src/index.tsx"
+  },
+  "dependencies": {
+    "@writer/plugin-api": "0.1.0",
+    "react": "^18.0.0"
+  }
+}

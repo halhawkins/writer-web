@@ -1,5 +1,5 @@
 import React from "react";
-import type { PluginModule } from "@writer/plugin-api";
+import type { AppApi, PluginModule } from "@writer/plugin-api";
 
 export const manifest: PluginModule["manifest"] = {
   id: "outline",
@@ -8,7 +8,7 @@ export const manifest: PluginModule["manifest"] = {
   appApi: "^0.1.0"
 };
 
-export function register(api: any) {
+export function register(api: AppApi) {
   api.workspace.addPanel({
     id: "outline.panel",
     title: "Outline",
