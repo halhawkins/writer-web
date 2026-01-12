@@ -46,15 +46,15 @@ export interface AppApi {
   // Stubs for now; you can flesh these out later
   documents: {
     list(): Promise<{ id: string; title: string }[]>;
-    open(id: string): Promise<void>;
-    save(): Promise<void>;
+    // open(id: string): Promise<void>; // commented no mutation
+    // save(): Promise<void>; // commented no mutation
     getCurrent(): { id: string; title: string } | null;
   };
 
   editor: {
     getText(): string;
-    setText(text: string): void;
-    insertText(text: string): void;
+    // setText(text: string): void; // commented no mutation
+    // insertText(text: string): void; // commented no mutation
   };
 
   storage: {
