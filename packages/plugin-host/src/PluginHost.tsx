@@ -2,7 +2,11 @@ import React from "react";
 import type { SlotId } from "@writer/plugin-api";
 import type { PluginRuntime } from "@writer/plugin-runtime";
 
-export function PluginHost(props: { runtime: PluginRuntime }) {
+export function PluginHost(props: {
+  runtime: PluginRuntime;
+  editorText: string;
+  setEditorText: (next: string) => void;
+}) {
   const state = props.runtime.getState();
 
   const renderSlot = (slot: SlotId) =>
@@ -15,7 +19,15 @@ export function PluginHost(props: { runtime: PluginRuntime }) {
 
   return (
     <div style={{ display: "grid", gridTemplateColumns: "1fr 360px", height: "100vh" }}>
-      <main style={{ padding: 12 }}>Editor Area (later)</main>
+      <main style={{ padding: 12 }}>
+        <textarea
+          value={props.editorText}
+          onChange={(e) => props.setEditorText(e.target.value)}
+          style={{ width: "100%", height: "100%", resize: "none" }}
+          spellCheck={false}
+        />
+
+      </main>
       <aside style={{ padding: 12, borderLeft: "1px solid #ddd" }}>
         <h3>Right Panel</h3>
         {renderSlot("rightPanel")}

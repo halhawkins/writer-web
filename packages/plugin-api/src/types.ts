@@ -37,7 +37,16 @@ export interface WorkspaceApi {
   openPanel?(id: string): void;
   closePanel?(id: string): void;
   togglePanel?(id: string): void;
-}
+};
+
+export type EditorReadApi = {
+  getText(): string;
+};
+
+export type EditorWriteApi = EditorReadApi & {
+  setText(text: string): void;
+  insertText(text: string): void;
+};
 
 export interface AppApi {
   version: string;
@@ -46,16 +55,10 @@ export interface AppApi {
   // Stubs for now; you can flesh these out later
   documents: {
     list(): Promise<{ id: string; title: string }[]>;
-    // open(id: string): Promise<void>; // commented no mutation
-    // save(): Promise<void>; // commented no mutation
     getCurrent(): { id: string; title: string } | null;
   };
 
-  editor: {
-    getText(): string;
-    // setText(text: string): void; // commented no mutation
-    // insertText(text: string): void; // commented no mutation
-  };
+  editor: EditorWriteApi;
 
   storage: {
     get<T>(key: string, fallback: T): Promise<T>;
@@ -66,6 +69,7 @@ export interface AppApi {
     on<T>(event: string, handler: (payload: T) => void): () => void;
     emit<T>(event: string, payload: T): void;
   };
+  
 }
 
 export type PluginRegister = (api: AppApi) => void;
