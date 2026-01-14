@@ -10,6 +10,9 @@
     "dev": "npm run dev -w apps/writer-web",
     "build": "npm run build -ws",
     "typecheck": "npm run typecheck -ws",
-    "clean": "npm run clean -ws"
+    "clean": "npm run clean -ws",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:watch": "vitest --watch"
   }
 }
