@@ -1,5 +1,5 @@
-import { type ProjectManifestV1, type ProjectDocumentId } from "@writer/plugin-api";
-import { ProjectStore } from "./ProjectStore";
+import type { ProjectManifestV1, ProjectDocumentId } from "@writer/plugin-api";
+import type { ProjectStore } from "./ProjectStore";
 
 export class InMemoryProjectStore implements ProjectStore {
   private manifest!: ProjectManifestV1;
@@ -37,3 +37,5 @@ export class InMemoryProjectStore implements ProjectStore {
     this.documentContent.set(id, content);
   }
 }
+export * from "./sampleManifest";
+export * from "./ProjectStore";

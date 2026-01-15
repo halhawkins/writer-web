@@ -5,13 +5,16 @@
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-    "exports": {
-        ".": "./src/index.ts"
-    },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
   "scripts": {
     "build": "tsc -b",
     "typecheck": "tsc -b --noEmit",
-    "clean": "rimraf dist *.tsbuildinfo"
+    "clean": "rimraf dist ./*.tsbuildinfo"
   },
   "dependencies": {
     "@writer/plugin-api": "0.1.0"

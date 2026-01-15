@@ -36,17 +36,6 @@ export class PluginRuntime {
     this.commands = [];
     (Object.keys(this.panelsBySlot) as SlotId[]).forEach((slot) => (this.panelsBySlot[slot] = []));
 
-    // contribution-capturing workspace
-    // const workspace = {
-    //   addPanel: (panel: PanelContribution) => {
-    //     this.panelsBySlot[panel.slot].push(panel);
-    //   },
-    //   removePanel: (id: string) => {
-    //     (Object.keys(this.panelsBySlot) as SlotId[]).forEach((slot) => {
-    //       this.panelsBySlot[slot] = this.panelsBySlot[slot].filter((p) => p.id !== id);
-    //     });
-    //   }
-    // };
     const workspace = {
     addPanel: (panel: PanelContribution) => {
         this.panelsBySlot[panel.slot].push(panel);
