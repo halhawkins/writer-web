@@ -26,7 +26,16 @@ export interface CommandContribution {
   run: () => void | Promise<void>;
 }
 
+interface ProjectSnapshot {
+  documents: {
+    id: string;
+    title: string;
+  }[];
+}
+
 export interface WorkspaceApi {
+  getProject(): ProjectSnapshot;
+
   addPanel(panel: PanelContribution): void;
   removePanel(id: string): void;
 

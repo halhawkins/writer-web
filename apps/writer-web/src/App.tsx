@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   PluginRuntime,
   createSampleProjectManifestV1,
@@ -12,6 +12,7 @@ import "./App.css";
 
 export default function App() {
   const [editorText, setEditorText] = useState("Hello, editor stub.\n");
+  const [runtimeRev, setRuntimeRev] = useState(0);
 
   const editorTextRef = useRef(editorText);
   useEffect(() => {
@@ -32,10 +33,13 @@ export default function App() {
     return {
       version: "0.1.0",
       workspace: {
+        getProject: () => {
+          throw new Error("workspace.getProject() is provided by PluginRuntime during rebuild()");
+        },
         addPanel: () => {},
         removePanel: () => {},
         addCommand: () => {},
-        removeCommand: () => {},
+        removeCommand: () => {}
       },
       documents: {
         async list() {
@@ -67,8 +71,8 @@ export default function App() {
         insertText: (text: string) => setEditorText((prev) => prev + text),
       },
     };
-  }, [projectStore]); // projectStore is stable, so this effectively runs once
-
+  }, [projectStore]); 
+  
   const runtime = useMemo(() => {
     const r = new PluginRuntime(api);
     r.registerModule(outline);
@@ -77,6 +81,11 @@ export default function App() {
     return r;
   }, [api]);
 
+  useLayoutEffect(() => {
+    runtime.rebuild();
+    setRuntimeRev((r) => r + 1);
+  }, [runtime, editorText]);
+  
   return (
     <div className="app-container">
       <div className="app-surround"></div>

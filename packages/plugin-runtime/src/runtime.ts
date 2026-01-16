@@ -1,5 +1,7 @@
 // import type { AppApi, PluginModule, PanelContribution, SlotId } from "@writer/plugin-api";
 import type { AppApi, PluginModule, PanelContribution, CommandContribution, SlotId } from "@writer/plugin-api";
+import { InMemoryProjectStore, createSampleProjectManifestV1 } from "./project";
+import type { WorkspaceApi } from "@writer/plugin-api";
 
 
 export interface RuntimeState {
@@ -12,6 +14,8 @@ export class PluginRuntime {
   private modules = new Map<string, PluginModule>();
   private commands: CommandContribution[] = [];
 
+  private projectStore = new InMemoryProjectStore();
+
   private panelsBySlot: RuntimeState["panelsBySlot"] = {
     leftSidebar: [],
     rightPanel: [],
@@ -20,8 +24,19 @@ export class PluginRuntime {
     statusBar: []
   };
 
+  getState(): RuntimeState & { tick: number } {
+    return { panelsBySlot: this.panelsBySlot, commands: this.commands, tick: this.tick };
+  }
+
+  private tick = 0;
+
+  notifyChaged() {
+    this.tick++;
+  }
+
   constructor(api: AppApi) {
     this.api = api;
+    this.projectStore.load(createSampleProjectManifestV1());
   }
 
   registerModule(mod: PluginModule) {
@@ -37,6 +52,7 @@ export class PluginRuntime {
     (Object.keys(this.panelsBySlot) as SlotId[]).forEach((slot) => (this.panelsBySlot[slot] = []));
 
     const workspace = {
+    getProject: () => this.projectStore.getSnapshot(),
     addPanel: (panel: PanelContribution) => {
         this.panelsBySlot[panel.slot].push(panel);
     },
@@ -66,8 +82,4 @@ export class PluginRuntime {
       this.panelsBySlot[slot].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
     });
   }
-
-getState(): RuntimeState {
-  return { panelsBySlot: this.panelsBySlot, commands: this.commands };
-}
 }

@@ -21,6 +21,15 @@ export class InMemoryProjectStore implements ProjectStore {
     return this.manifest.tree.rootId;
   }
 
+  getSnapshot() {
+    return {
+      documents: Object.values(this.manifest.documents).map((d) => ({
+        id: d.id,
+        title: d.title
+      }))
+    };
+  }
+
   getDocumentMeta(id: ProjectDocumentId) {
     return this.manifest.documents[id];
   }
