@@ -1,40 +1,3 @@
-// import React from "react";
-// import type { SlotId } from "@writer/plugin-api";
-// import type { PluginRuntime } from "@writer/plugin-runtime";
-
-// export function PluginHost(props: {
-//   runtime: PluginRuntime;
-//   editorText: string;
-//   setEditorText: (next: string) => void;
-// }) {
-//   const state = props.runtime.getState();
-
-//   const renderSlot = (slot: SlotId) =>
-//     state.panelsBySlot[slot].map((p) => (
-//       <section key={p.id} style={{ border: "1px solid #ddd", padding: 10, marginBottom: 10 }}>
-//         <strong>{p.title}</strong>
-//         <div style={{ marginTop: 8 }}>{p.render({ close: () => {} }) as React.ReactNode}</div>
-//       </section>
-//     ));
-
-//   return (
-//     <div style={{ display: "grid", gridTemplateColumns: "1fr 360px", height: "100vh" }}>
-//       <main style={{ padding: 12 }}>
-//         <textarea
-//           value={props.editorText}
-//           onChange={(e) => props.setEditorText(e.target.value)}
-//           style={{ width: "100%", height: "100%", resize: "none" }}
-//           spellCheck={false}
-//         />
-
-//       </main>
-//       <aside style={{ padding: 12, borderLeft: "1px solid #ddd" }}>
-//         <h3>Right Panel</h3>
-//         {renderSlot("rightPanel")}
-//       </aside>
-//     </div>
-//   );
-// }
 import React from "react";
 import type { SlotId } from "@writer/plugin-api";
 import type { PluginRuntime } from "@writer/plugin-runtime";
@@ -47,12 +10,52 @@ type PanelFrameProps = {
   onClose?: PanelCloseFn; // placeholder for later
 };
 
-function AppLayout(props: { children: React.ReactNode }) {
-  return <div style={styles.appLayout}>{props.children}</div>;
+function AppLayout(props: { header: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <div style={styles.appShell}>
+      <div style={styles.topBar}>{props.header}</div>
+      <div style={styles.appBody}>{props.children}</div>
+    </div>
+  );
 }
 
-function EditorSurface(props: { children?: React.ReactNode }) {
-  return <main style={styles.editorSurface}>{props.children ?? "Editor Area (later)"}</main>;
+function TopBar() {
+  return (
+    <div style={styles.topBarInner}>
+      <div style={styles.brandBlock}>
+        <div style={styles.appName}>Writer Platform</div>
+        <div style={styles.projectName}>Project: Sample Project</div>
+      </div>
+
+      <div style={styles.topBarActions}>
+        <button type="button" style={styles.topBarButton} disabled title="Coming soon">
+          Project
+        </button>
+        <button type="button" style={styles.topBarButton} disabled title="Coming soon">
+          Plugins
+        </button>
+        <button type="button" style={styles.topBarButton} disabled title="Coming soon">
+          Help
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function EditorSurface(props: {
+  editorText: string;
+  setEditorText: React.Dispatch<React.SetStateAction<string>>;
+}) {
+  return (
+    <main style={styles.editorSurface}>
+      <textarea
+        value={props.editorText}
+        onChange={(e) => props.setEditorText(e.target.value)}
+        placeholder="Editor Area (temporary)"
+        style={styles.editorTextarea}
+      />
+    </main>
+  );
 }
 
 function SideBar(props: { title: string; children: React.ReactNode }) {
@@ -113,10 +116,10 @@ function PanelSlot(props: { runtime: PluginRuntime; slot: SlotId }) {
   );
 }
 
-export function PluginHost(props: { runtime: PluginRuntime }) {
+export function PluginHost(props: { runtime: PluginRuntime, editorText: string, setEditorText: React.Dispatch<React.SetStateAction<string>> }) {
   return (
-    <AppLayout>
-      <EditorSurface />
+    <AppLayout header={<TopBar />}>
+      <EditorSurface editorText={props.editorText} setEditorText={props.setEditorText} />
       <SideBar title="Right Panel">
         <PanelSlot runtime={props.runtime} slot="rightPanel" />
       </SideBar>
@@ -130,8 +133,41 @@ const styles: Record<string, React.CSSProperties> = {
     gridTemplateColumns: "1fr 360px",
     height: "100vh"
   },
+  appBody: {
+    display: "grid",
+    gridTemplateColumns: "1fr 360px",
+    minHeight: 0 // important so sidebar can scroll
+  },
+  appName: {
+    fontSize: 14,
+    fontWeight: 700
+  },
+  appShell: {
+    height: "100vh",
+    display: "grid",
+    gridTemplateRows: "48px 1fr"
+  },
+  brandBlock: {
+    display: "flex",
+    flexDirection: "column",
+    lineHeight: 1.1
+  },
   editorSurface: {
     padding: 12
+  },
+  editorTextarea: {
+    width: "100%",
+    height: "100%",
+    resize: "none",
+    border: "1px solid #ddd",
+    borderRadius: 8,
+    padding: 10,
+    fontFamily: "inherit",
+    fontSize: 14
+  },
+  projectName: {
+    fontSize: 12,
+    opacity: 0.75
   },
   sideBar: {
     padding: 12,
@@ -153,6 +189,32 @@ const styles: Record<string, React.CSSProperties> = {
   sideBarBody: {
     overflow: "auto",
     paddingRight: 4
+  },
+  topBar: {
+    borderBottom: "1px solid #ddd",
+    background: "#fff"
+  },
+  topBarActions: {
+    display: "flex",
+    alignItems: "center",
+    gap: 8
+  },
+  topBarButton: {
+    height: 28,
+    padding: "0 10px",
+    borderRadius: 8,
+    border: "1px solid #ddd",
+    background: "#fafafa",
+    cursor: "not-allowed",
+    fontSize: 12
+  },
+  topBarInner: {
+    height: "100%",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: "0 12px",
+    gap: 12
   },
   panelFrame: {
     border: "1px solid #ddd",

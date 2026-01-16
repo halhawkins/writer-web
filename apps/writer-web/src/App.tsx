@@ -90,7 +90,7 @@ export default function App() {
     <div className="app-container">
       <div className="app-surround"></div>
       <div className="host-container">
-        <PluginHost runtime={runtime} editorText={editorText} setEditorText={setEditorText} />
+        <PluginHost runtime={runtime}  editorText={editorText} setEditorText={setEditorText} /> {/*  editorText={editorText} setEditorText={setEditorText} */}
       </div>
       <div className="app-surround"></div>
     </div>
