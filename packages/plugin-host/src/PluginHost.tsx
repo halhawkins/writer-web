@@ -116,14 +116,58 @@ function PanelSlot(props: { runtime: PluginRuntime; slot: SlotId }) {
   );
 }
 
-export function PluginHost(props: { runtime: PluginRuntime, editorText: string, setEditorText: React.Dispatch<React.SetStateAction<string>> }) {
+export function PluginHost(props: { 
+  runtime: PluginRuntime;
+  docs: { id: string; title: string }[];
+  currentDocId: string | null;
+  onOpenDoc: (id: string) => void;
+  editorText: string;
+  setEditorText: (text: string) => void;
+}) {
+  const state = props.runtime.getState();
+
+  const renderSlot = (slot: SlotId) =>
+    state.panelsBySlot[slot].map((p) => (
+      <section key={p.id} style={{ border: "1px solid #ddd", padding: 10, marginBottom: 10 }}>
+        <strong>{p.title}</strong>
+        <div style={{ marginTop: 8 }}>{p.render({ close: () => {} }) as React.ReactNode}</div>
+      </section>
+    ));
+
   return (
-    <AppLayout header={<TopBar />}>
-      <EditorSurface editorText={props.editorText} setEditorText={props.setEditorText} />
-      <SideBar title="Right Panel">
-        <PanelSlot runtime={props.runtime} slot="rightPanel" />
-      </SideBar>
-    </AppLayout>
+    <div style={{ display: "grid", gridTemplateColumns: "1fr 360px", height: "100vh" }}>
+      <main style={{ padding: 12, display: "grid", gridTemplateRows: "auto 1fr", gap: 12 }}>
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <label>
+            Document:{" "}
+            <select
+              value={props.currentDocId ?? ""}
+              onChange={(e) => props.onOpenDoc(e.target.value)}
+            >
+              <option value="" disabled>
+                Select…
+              </option>
+              {props.docs.map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.title}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+
+        <textarea
+          value={props.editorText}
+          onChange={(e) => props.setEditorText(e.target.value)}
+          style={{ width: "100%", height: "100%", resize: "none" }}
+        />
+      </main>
+
+      <aside style={{ padding: 12, borderLeft: "1px solid #ddd" }}>
+        <h3>Right Panel</h3>
+        {renderSlot("rightPanel")}
+      </aside>
+    </div>
   );
 }
 
