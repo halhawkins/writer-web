@@ -2,6 +2,14 @@ import * as React from "react";
 
 export type SlotId = "leftSidebar" | "rightPanel" | "bottomPanel" | "toolbar" | "statusBar";
 
+export type DocumentSummary = { id: string; title: string };
+
+export type DocumentsApi = {
+  list(): Promise<DocumentSummary[]>;
+  getCurrent(): DocumentSummary | null;
+  open(id: string): Promise<void>;
+};
+
 export interface PluginManifest {
   id: string;
   name: string;
@@ -26,7 +34,16 @@ export interface CommandContribution {
   run: () => void | Promise<void>;
 }
 
+interface ProjectSnapshot {
+  documents: {
+    id: string;
+    title: string;
+  }[];
+}
+
 export interface WorkspaceApi {
+  getProject(): ProjectSnapshot;
+
   addPanel(panel: PanelContribution): void;
   removePanel(id: string): void;
 
@@ -53,10 +70,7 @@ export interface AppApi {
   workspace: WorkspaceApi;
 
   // Stubs for now; you can flesh these out later
-  documents: {
-    list(): Promise<{ id: string; title: string }[]>;
-    getCurrent(): { id: string; title: string } | null;
-  };
+  documents: DocumentsApi;
 
   editor: EditorWriteApi;
 
