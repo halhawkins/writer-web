@@ -8,6 +8,13 @@ export type DocumentsApi = {
   list(): Promise<DocumentSummary[]>;
   getCurrent(): DocumentSummary | null;
   open(id: string): Promise<void>;
+  
+  /**
+   * Saves the currently open document.
+   * NOTE: Plugins should not call this directly.
+   * Use ActionsApi.requestSaveDocument instead.
+   */
+  save(): Promise<void>;
 };
 
 export interface PluginManifest {
@@ -65,6 +72,8 @@ export type EditorWriteApi = EditorReadApi & {
   insertText(text: string): void;
 };
 
+export type ProjectDocumentId = string & { readonly __brand: "ProjectDocumentId" };
+
 export interface AppApi {
   version: string;
   workspace: WorkspaceApi;
@@ -83,7 +92,12 @@ export interface AppApi {
     on<T>(event: string, handler: (payload: T) => void): () => void;
     emit<T>(event: string, payload: T): void;
   };
-  
+  actions: {
+    requestOpenDocument(id: ProjectDocumentId): void;
+    requestSaveDocument(): void;
+    requestSetText(text: string): void;
+    requestInsertText(text: string): void;
+  };
 }
 
 export type PluginRegister = (api: AppApi) => void;
