@@ -41,9 +41,129 @@ export default function App() {
     };
   }, []);
 
+  // const api: AppApi = useMemo(() => {
+  //   return {
+  //     version: "0.1.0",
+  //     workspace: {
+  //       getProject: () => {
+  //         throw new Error("workspace.getProject() is provided by PluginRuntime during rebuild()");
+  //       },
+  //       addPanel: () => {},
+  //       removePanel: () => {},
+  //       addCommand: () => {},
+  //       removeCommand: () => {},
+  //     },
+
+  //     documents: {
+  //       async list() {
+  //         // InMemoryProjectStore.listDocuments() is synchronous
+  //         return projectStore.listDocuments().map((d) => ({ id: d.id, title: d.title }));
+  //       },
+
+  //       async open(id: ProjectDocumentId) {
+  //         const meta = projectStore.getDocumentMeta(id);
+  //         const content = await projectStore.getDocumentContent(id);
+
+  //         setCurrentDoc({ id: meta.id, title: meta.title });
+  //         setEditorText(content);
+
+  //         events.emit("document:opened", { id });
+  //         events.emit("editor:textChanged", { id, text: content });
+  //       },
+
+  //       async save() {
+  //         const id = currentDoc?.id;
+  //         if (!id) return;
+  //         await projectStore.saveDocumentContent(id, editorTextRef.current);
+  //         events.emit("document:saved", { id });
+  //       },
+
+  //       getCurrent() {
+  //         return currentDoc;
+  //       }
+  //     },
+
+  //     editor: {
+  //       getText() {
+  //         return editorTextRef.current;
+  //       },
+  //       setText(text: string) {
+  //         setEditorText(text);
+  //         const id = currentDoc?.id;
+  //         if (id) events.emit("editor:textChanged", { id, text });
+  //       },
+  //       insertText(text: string) {
+  //         const next = editorTextRef.current + text;
+  //         setEditorText(next);
+  //         const id = currentDoc?.id;
+  //         if (id) events.emit("editor:textChanged", { id, text: next });
+  //       }
+  //     },
+
+  //     storage: {
+  //       async get<T>(_key: string, fallback: T) {
+  //         return fallback;
+  //       },
+  //       async set<T>(_key: string, _value: T) {}
+  //     },
+
+  //     events
+  //   };
+  // }, [projectStore, events, currentDoc]);
+
   const api: AppApi = useMemo(() => {
+    const documents = {
+      async list() {
+        return projectStore
+          .listDocuments()
+          .map((d) => ({ id: d.id, title: d.title }));
+      },
+
+      async open(id: ProjectDocumentId) {
+        const meta = projectStore.getDocumentMeta(id);
+        const content = await projectStore.getDocumentContent(id);
+
+        setCurrentDoc({ id: meta.id as ProjectDocumentId, title: meta.title });
+        setEditorText(content);
+
+        events.emit("document:opened", { id });
+        events.emit("editor:textChanged", { id, text: content });
+      },
+
+      async save() {
+        const id = currentDoc?.id;
+        if (!id) return;
+        await projectStore.saveDocumentContent(id, editorTextRef.current);
+        events.emit("document:saved", { id });
+      },
+
+      getCurrent() {
+        return currentDoc;
+      }
+    };
+
+    const editor = {
+      getText() {
+        return editorTextRef.current;
+      },
+
+      setText(text: string) {
+        setEditorText(text);
+        const id = currentDoc?.id;
+        if (id) events.emit("editor:textChanged", { id, text });
+      },
+
+      insertText(text: string) {
+        const next = editorTextRef.current + text;
+        setEditorText(next);
+        const id = currentDoc?.id;
+        if (id) events.emit("editor:textChanged", { id, text: next });
+      }
+    };
+
     return {
       version: "0.1.0",
+
       workspace: {
         getProject: () => {
           throw new Error("workspace.getProject() is provided by PluginRuntime during rebuild()");
@@ -54,49 +174,24 @@ export default function App() {
         removeCommand: () => {}
       },
 
-      documents: {
-        async list() {
-          // InMemoryProjectStore.listDocuments() is synchronous
-          return projectStore.listDocuments().map((d) => ({ id: d.id, title: d.title }));
+      documents,
+      editor,
+
+      actions: {
+        requestOpenDocument: (id: ProjectDocumentId) => {
+          documents.open(id);
         },
 
-        async open(id: ProjectDocumentId) {
-          const meta = projectStore.getDocumentMeta(id);
-          const content = await projectStore.getDocumentContent(id);
-
-          setCurrentDoc({ id: meta.id, title: meta.title });
-          setEditorText(content);
-
-          events.emit("document:opened", { id });
-          events.emit("editor:textChanged", { id, text: content });
+        requestSaveDocument: () => {
+          documents.save();
         },
 
-        async save() {
-          const id = currentDoc?.id;
-          if (!id) return;
-          await projectStore.saveDocumentContent(id, editorTextRef.current);
-          events.emit("document:saved", { id });
+        requestSetText: (text: string) => {
+          editor.setText(text);
         },
 
-        getCurrent() {
-          return currentDoc;
-        }
-      },
-
-      editor: {
-        getText() {
-          return editorTextRef.current;
-        },
-        setText(text: string) {
-          setEditorText(text);
-          const id = currentDoc?.id;
-          if (id) events.emit("editor:textChanged", { id, text });
-        },
-        insertText(text: string) {
-          const next = editorTextRef.current + text;
-          setEditorText(next);
-          const id = currentDoc?.id;
-          if (id) events.emit("editor:textChanged", { id, text: next });
+        requestInsertText: (text: string) => {
+          editor.insertText(text);
         }
       },
 
@@ -120,10 +215,14 @@ export default function App() {
   }, [api]);
 
   // Populate document list once
-  useEffect(() => {
-    api.documents.list().then(setDocs);
+  useEffect(() => { 
+    api.documents
+      .list()
+      .then((docs) => { 
+        setDocs(docs.map((d) => (
+          { ...d, id: d.id as ProjectDocumentId }))); 
+      }); 
   }, [api]);
-
   // Persist edits through ProjectStore APIs (host-only)
   useEffect(() => {
     const id = currentDoc?.id;
