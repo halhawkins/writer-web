@@ -5,11 +5,17 @@ import { PluginHost } from "@writer/plugin-host";
 
 import { plugin as outline } from "@writer/plugins-outline";
 import { plugin as stats } from "@writer/plugins-stats";
+// import { DexieProjectStore } from "@writer/plugin-runtime";
 import "./App.css";
 
-type DocMeta = { id: ProjectDocumentId; title: string };
+type DocMeta = { 
+  id: ProjectDocumentId; 
+  title: string;
+  updatedAt: number;
+};
 
 export default function App() {
+
   const projectStoreRef = useRef<InMemoryProjectStore | null>(null);
   if (!projectStoreRef.current) {
     const s = new InMemoryProjectStore();
@@ -41,89 +47,19 @@ export default function App() {
     };
   }, []);
 
-  // const api: AppApi = useMemo(() => {
-  //   return {
-  //     version: "0.1.0",
-  //     workspace: {
-  //       getProject: () => {
-  //         throw new Error("workspace.getProject() is provided by PluginRuntime during rebuild()");
-  //       },
-  //       addPanel: () => {},
-  //       removePanel: () => {},
-  //       addCommand: () => {},
-  //       removeCommand: () => {},
-  //     },
-
-  //     documents: {
-  //       async list() {
-  //         // InMemoryProjectStore.listDocuments() is synchronous
-  //         return projectStore.listDocuments().map((d) => ({ id: d.id, title: d.title }));
-  //       },
-
-  //       async open(id: ProjectDocumentId) {
-  //         const meta = projectStore.getDocumentMeta(id);
-  //         const content = await projectStore.getDocumentContent(id);
-
-  //         setCurrentDoc({ id: meta.id, title: meta.title });
-  //         setEditorText(content);
-
-  //         events.emit("document:opened", { id });
-  //         events.emit("editor:textChanged", { id, text: content });
-  //       },
-
-  //       async save() {
-  //         const id = currentDoc?.id;
-  //         if (!id) return;
-  //         await projectStore.saveDocumentContent(id, editorTextRef.current);
-  //         events.emit("document:saved", { id });
-  //       },
-
-  //       getCurrent() {
-  //         return currentDoc;
-  //       }
-  //     },
-
-  //     editor: {
-  //       getText() {
-  //         return editorTextRef.current;
-  //       },
-  //       setText(text: string) {
-  //         setEditorText(text);
-  //         const id = currentDoc?.id;
-  //         if (id) events.emit("editor:textChanged", { id, text });
-  //       },
-  //       insertText(text: string) {
-  //         const next = editorTextRef.current + text;
-  //         setEditorText(next);
-  //         const id = currentDoc?.id;
-  //         if (id) events.emit("editor:textChanged", { id, text: next });
-  //       }
-  //     },
-
-  //     storage: {
-  //       async get<T>(_key: string, fallback: T) {
-  //         return fallback;
-  //       },
-  //       async set<T>(_key: string, _value: T) {}
-  //     },
-
-  //     events
-  //   };
-  // }, [projectStore, events, currentDoc]);
-
   const api: AppApi = useMemo(() => {
     const documents = {
       async list() {
         return projectStore
           .listDocuments()
-          .map((d) => ({ id: d.id, title: d.title }));
+          .map((d) => ({ id: d.id, title: d.title, updatedAt: d.updatedAt }));
       },
 
       async open(id: ProjectDocumentId) {
         const meta = projectStore.getDocumentMeta(id);
         const content = await projectStore.getDocumentContent(id);
 
-        setCurrentDoc({ id: meta.id as ProjectDocumentId, title: meta.title });
+        setCurrentDoc({ id: meta.id as ProjectDocumentId, title: meta.title, updatedAt: meta.updatedAt });
         setEditorText(content);
 
         events.emit("document:opened", { id });

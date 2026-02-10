@@ -14,5 +14,10 @@
     "test": "vitest",
     "test:run": "vitest run",
     "test:watch": "vitest --watch"
+  },
+  "dependencies": {
+    "@fontsource/roboto": "^5.2.9",
+    "dexie": "^4.3.0",
+    "react-colorful": "^5.6.1"
   }
 }

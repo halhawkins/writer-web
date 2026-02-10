@@ -7,8 +7,8 @@ export type ProjectManifestV1 = {
   project: {
     id: string;
     name: string;
-    createdAt: string; // ISO 8601
-    updatedAt: string; // ISO 8601
+    createdAt: number; // ISO 8601
+    updatedAt: number; // ISO 8601
   };
 
   tree: {
@@ -43,8 +43,8 @@ export type ProjectDocumentMetaV1 = {
   // Points to document content stored elsewhere (RTF/plaintext/etc.)
   storageKey: string;
 
-  createdAt: string; // ISO 8601
-  updatedAt: string; // ISO 8601
+  createdAt: number; // ISO 8601
+  updatedAt: number; // ISO 8601
 
   tags?: string[];
 };

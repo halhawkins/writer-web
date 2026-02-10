@@ -8,34 +8,34 @@ describe("InMemoryProjectStore", () => {
       format: "writers-web-project",
       version: 1,
       project: {
-        id: "proj-1",
+        id: "proj-1" as any,
         name: "Sample Project",
-        createdAt: "2026-01-14T00:00:00.000Z",
-        updatedAt: "2026-01-14T00:00:00.000Z",
+        createdAt: 1770512494356,
+        updatedAt: 1770512494356,
       },
       tree: {
-        rootId: "node-root",
+        rootId: "node-root" as any,
         nodes: {
           "node-root": {
             kind: "folder",
-            id: "node-root",
+            id: "node-root" as any,
             name: "Root",
-            children: ["node-doc-1"],
+            children: ["node-doc-1" as any],
           },
           "node-doc-1": {
             kind: "document",
-            id: "node-doc-1",
-            docId: "doc-1",
+            id: "node-doc-1" as any,
+            docId: "doc-1" as any,
           },
         },
       },
       documents: {
         "doc-1": {
-          id: "doc-1",
+          id: "doc-1" as any,
           title: "Chapter 1",
           storageKey: "docs/doc-1.rtf",
-          createdAt: "2026-01-14T00:00:00.000Z",
-          updatedAt: "2026-01-14T00:00:00.000Z",
+          createdAt: 1770512494356,
+          updatedAt: 1770512494356,
           tags: ["draft"],
         },
       },
@@ -47,26 +47,26 @@ describe("InMemoryProjectStore", () => {
     // Tree access
     expect(store.getRootNodeId()).toBe("node-root");
 
-    const root = store.getNode("node-root");
+    const root = store.getNode("node-root" as any);
     expect(root.kind).toBe("folder");
     if (root.kind === "folder") {
       expect(root.children).toEqual(["node-doc-1"]);
     }
 
-    const leaf = store.getNode("node-doc-1");
+    const leaf = store.getNode("node-doc-1" as any);
     expect(leaf.kind).toBe("document");
     if (leaf.kind === "document") {
       expect(leaf.docId).toBe("doc-1");
     }
 
     // Document meta
-    const meta = store.getDocumentMeta("doc-1");
+    const meta = store.getDocumentMeta("doc-1" as any);
     expect(meta.title).toBe("Chapter 1");
     expect(meta.storageKey).toBe("docs/doc-1.rtf");
 
     // Document content (stubbed)
-    expect(await store.getDocumentContent("doc-1")).toBe("");
-    await store.saveDocumentContent("doc-1", "{\\rtf1 Hello world}");
-    expect(await store.getDocumentContent("doc-1")).toBe("{\\rtf1 Hello world}");
+    expect(await store.getDocumentContent("doc-1" as any)).toBe("");
+    await store.saveDocumentContent("doc-1" as any, "{\\rtf1 Hello world}");
+    expect(await store.getDocumentContent("doc-1" as any)).toBe("{\\rtf1 Hello world}");
   });
 });

@@ -2,7 +2,11 @@ import * as React from "react";
 
 export type SlotId = "leftSidebar" | "rightPanel" | "bottomPanel" | "toolbar" | "statusBar";
 
-export type DocumentSummary = { id: string; title: string };
+export type DocumentSummary = { 
+  id: string; 
+  title: string;
+  updatedAt: number; 
+};
 
 export type DocumentsApi = {
   list(): Promise<DocumentSummary[]>;
