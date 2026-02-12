@@ -5,7 +5,7 @@ import { PluginHost } from "@writer/plugin-host";
 
 import { plugin as outline } from "@writer/plugins-outline";
 import { plugin as stats } from "@writer/plugins-stats";
-// import { DexieProjectStore } from "@writer/plugin-runtime";
+import { DexieProjectStore } from "@writer/plugin-runtime";
 import "./App.css";
 
 type DocMeta = { 
@@ -17,18 +17,20 @@ type DocMeta = {
 export default function App() {
 
   const projectStoreRef = useRef<InMemoryProjectStore | null>(null);
+  const projectStore = useMemo(() => new DexieProjectStore(), []);
+  const [docs, setDocs] = useState<{ id: ProjectDocumentId; title: string; updatedAt?: number }[]>([]);
+
   if (!projectStoreRef.current) {
     const s = new InMemoryProjectStore();
     s.load(createSampleProjectManifestV1()); // or your existing manifest creation
     projectStoreRef.current = s;
   }
-  const projectStore = projectStoreRef.current;
+  // const projectStore = projectStoreRef.current;
 
-  const [docs, setDocs] = useState<DocMeta[]>([]);
   const [currentDoc, setCurrentDoc] = useState<DocMeta | null>(null);
-
   const [editorText, setEditorText] = useState("");
   const editorTextRef = useRef(editorText);
+
   useEffect(() => void (editorTextRef.current = editorText), [editorText]);
 
   // minimal event bus so plugins can update without runtime.rebuild()
@@ -47,16 +49,49 @@ export default function App() {
     };
   }, []);
 
+  useEffect(() => { 
+    editorTextRef.current = editorText; 
+  }, [editorText]);
+
+  useEffect(() => {
+    const init = async () => {
+      const list = await projectStore.listDocuments();
+      if (list.length === 0) {
+        // Create your first persistent document!
+        await projectStore.saveDocumentContent("doc-1" as ProjectDocumentId, "Hello from IndexedDB!", "My First Story");
+      }
+      
+      // Refresh the UI list
+      const updatedList = await projectStore.listDocuments();
+      setDocs(updatedList.map(d => ({ 
+        id: d.id as ProjectDocumentId, 
+        title: d.title, 
+        updatedAt: d.updatedAt 
+      })));
+    };
+    
+    init();
+  },[projectStore])
+
+  useEffect(() => {
+    const id = currentDoc?.id;
+    if (!id) return;
+
+    // Simple auto-save: persist to IndexedDB on every state change
+    projectStore.saveDocumentContent(id, editorText);
+
+    // Notify plugins (like Stats or Outline) that the text changed
+    events.emit("editor:textChanged", { id, text: editorText });
+  }, [editorText, currentDoc?.id, projectStore, events]);
+
   const api: AppApi = useMemo(() => {
     const documents = {
       async list() {
-        return projectStore
-          .listDocuments()
-          .map((d) => ({ id: d.id, title: d.title, updatedAt: d.updatedAt }));
+        return await projectStore.listDocuments();
       },
 
       async open(id: ProjectDocumentId) {
-        const meta = projectStore.getDocumentMeta(id);
+        const meta = await projectStore.getDocumentMeta(id);
         const content = await projectStore.getDocumentContent(id);
 
         setCurrentDoc({ id: meta.id as ProjectDocumentId, title: meta.title, updatedAt: meta.updatedAt });
@@ -69,8 +104,15 @@ export default function App() {
       async save() {
         const id = currentDoc?.id;
         if (!id) return;
+        
+        // Save content and update the numeric timestamp
         await projectStore.saveDocumentContent(id, editorTextRef.current);
+        
         events.emit("document:saved", { id });
+        
+        // Refresh the local docs list to show the new 'updatedAt' time in the UI
+        const updatedList = await projectStore.listDocuments();
+        setDocs(updatedList.map(d => ({ ...d, id: d.id as ProjectDocumentId })));
       },
 
       getCurrent() {
@@ -110,27 +152,14 @@ export default function App() {
         removeCommand: () => {}
       },
 
-      documents,
+    documents,
       editor,
-
       actions: {
-        requestOpenDocument: (id: ProjectDocumentId) => {
-          documents.open(id);
-        },
-
-        requestSaveDocument: () => {
-          documents.save();
-        },
-
-        requestSetText: (text: string) => {
-          editor.setText(text);
-        },
-
-        requestInsertText: (text: string) => {
-          editor.insertText(text);
-        }
+        requestOpenDocument: (id: ProjectDocumentId) => documents.open(id),
+        requestSaveDocument: () => documents.save(),
+        requestSetText: (text: string) => editor.setText(text),
+        requestInsertText: (text: string) => editor.insertText(text)
       },
-
       storage: {
         async get<T>(_key: string, fallback: T) {
           return fallback;
