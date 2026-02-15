@@ -17,6 +17,7 @@ export class PluginRuntime {
   private projectStore = new InMemoryProjectStore();
 
   private panelsBySlot: RuntimeState["panelsBySlot"] = {
+    mainPanel: [],
     leftSidebar: [],
     rightPanel: [],
     bottomPanel: [],
@@ -46,42 +47,6 @@ export class PluginRuntime {
     this.modules.set(mod.manifest.id, mod);
   }
 
-  // rebuild() {
-  //   // clear contributions
-  //   this.commands = [];
-  //   (Object.keys(this.panelsBySlot) as SlotId[]).forEach((slot) => (this.panelsBySlot[slot] = []));
-
-  //   const workspace = {
-  //   getProject: () => this.projectStore.getSnapshot(),
-  //   addPanel: (panel: PanelContribution) => {
-  //       this.panelsBySlot[panel.slot].push(panel);
-  //   },
-  //   removePanel: (id: string) => {
-  //       (Object.keys(this.panelsBySlot) as SlotId[]).forEach((slot) => {
-  //       this.panelsBySlot[slot] = this.panelsBySlot[slot].filter((p) => p.id !== id);
-  //       });
-  //   },
-
-  //   addCommand: (cmd: CommandContribution) => {
-  //       this.commands.push(cmd);
-  //   },
-  //   removeCommand: (id: string) => {
-  //       this.commands = this.commands.filter((c) => c.id !== id);
-  //   }
-  //   };
-
-
-  //   const apiForPlugins: AppApi = { ...this.api, workspace };
-
-  //   for (const mod of this.modules.values()) {
-  //     mod.register(apiForPlugins);
-  //   }
-
-  //   // optional sort
-  //   (Object.keys(this.panelsBySlot) as SlotId[]).forEach((slot) => {
-  //     this.panelsBySlot[slot].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
-  //   });
-  // }
   rebuild() {
     // clear contributions
     this.commands = [];
@@ -134,6 +99,7 @@ export class PluginRuntime {
         documents: {
           list: hostApi.documents.list,
           getCurrent: hostApi.documents.getCurrent,
+          getDocumentContent: hostApi.documents.getDocumentContent,
 
           open: async (_id: ProjectDocumentId) => {
             throw new Error(

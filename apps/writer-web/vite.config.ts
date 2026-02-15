@@ -5,6 +5,9 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   // Vite sometimes needs help treating workspace packages as source (especially TSX). If you hit odd build/import behavior, add this:
+  optimizeDeps: {
+    include: ['quill', 'quill-delta']
+  },
   resolve: {
     preserveSymlinks: true
   }

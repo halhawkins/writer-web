@@ -1,0 +1,17 @@
+{
+  "name": "@writer/plugins-quill-editor",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.tsx",
+  "exports": {
+    ".": {
+      "types": "./src/index.tsx",
+      "default": "./src/index.tsx"
+    }
+  },
+  "dependencies": {
+    "@writer/plugin-api": "0.1.0",
+    "react": "^18.0.0"
+  }
+}
