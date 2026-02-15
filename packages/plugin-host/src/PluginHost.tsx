@@ -48,12 +48,12 @@ function EditorSurface(props: {
 }) {
   return (
     <main style={styles.editorSurface}>
-      <textarea
+      {/* <textarea
         value={props.editorText}
         onChange={(e) => props.setEditorText(e.target.value)}
         placeholder="Editor Area (temporary)"
         style={styles.editorTextarea}
-      />
+      /> */}
     </main>
   );
 }
@@ -127,18 +127,20 @@ export function PluginHost(props: {
   const state = props.runtime.getState();
 
   const renderSlot = (slot: SlotId) =>
-    state.panelsBySlot[slot].map((p) => (
+    state.panelsBySlot[slot].map((p) => {
+      // console.log("Rendering panel", p);
+      return (
       <section key={p.id} style={{ border: "1px solid #ddd", padding: 10, marginBottom: 10 }}>
         <strong>{p.title}</strong>
         <div style={{ marginTop: 8 }}>{p.render({ close: () => {} }) as React.ReactNode}</div>
       </section>
-    ));
+    )});
 
   return (
     <div style={{ display: "grid", gridTemplateColumns: "1fr 360px", height: "100vh" }}>
       <main style={{ padding: 12, display: "grid", gridTemplateRows: "auto 1fr", gap: 12 }}>
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          <label>
+          <label style={{ width: "250px"}}>
             Document:{" "}
             <select
               value={props.currentDocId ?? ""}
@@ -154,17 +156,21 @@ export function PluginHost(props: {
               ))}
             </select>
           </label>
+          <button>New Item</button>
         </div>
+        <div className="main-panel">{renderSlot("mainPanel")}</div>
+        
+        {/* {renderSlot("rightPanel")} */}
 
-        <textarea
+        {/* <textarea
           value={props.editorText}
           onChange={(e) => props.setEditorText(e.target.value)}
           style={{ width: "100%", height: "100%", resize: "none" }}
-        />
+        /> */}
       </main>
 
       <aside style={{ padding: 12, borderLeft: "1px solid #ddd" }}>
-        <h3>Right Panel</h3>
+        <h3>Right SPanel</h3>
         {renderSlot("rightPanel")}
       </aside>
     </div>

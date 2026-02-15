@@ -5,6 +5,7 @@ import { PluginHost } from "@writer/plugin-host";
 
 import { plugin as outline } from "@writer/plugins-outline";
 import { plugin as stats } from "@writer/plugins-stats";
+import { plugin as quillEditor } from "@writer/plugins-quill-editor";
 import { DexieProjectStore } from "@writer/plugin-runtime";
 import "./App.css";
 
@@ -59,6 +60,7 @@ export default function App() {
       if (list.length === 0) {
         // Create your first persistent document!
         await projectStore.saveDocumentContent("doc-1" as ProjectDocumentId, "Hello from IndexedDB!", "My First Story");
+        await projectStore.saveDocumentContent("doc-2" as ProjectDocumentId, "This is the second document.", "Chapter 2");
       }
       
       // Refresh the UI list
@@ -85,9 +87,23 @@ export default function App() {
   }, [editorText, currentDoc?.id, projectStore, events]);
 
   const api: AppApi = useMemo(() => {
+    const activeDoc = currentDoc;
     const documents = {
+      getCurrentSummary: () => activeDoc, 
+      getFullDocument: async (id: string) => {
+        return await projectStore.getDocumentContent(id);
+      },
+      save: async (id: string, content: any) => {
+        await projectStore.saveDocumentContent(id, content);
+        events.emit("document:saved", { id });
+      },
       async list() {
         return await projectStore.listDocuments();
+      },
+
+
+      async getDocumentContent(id: ProjectDocumentId) {
+        return await projectStore.getDocumentContent(id);
       },
 
       async open(id: ProjectDocumentId) {
@@ -101,19 +117,19 @@ export default function App() {
         events.emit("editor:textChanged", { id, text: content });
       },
 
-      async save() {
-        const id = currentDoc?.id;
-        if (!id) return;
+      // async save() {
+      //   const id = currentDoc?.id;
+      //   if (!id) return;
         
-        // Save content and update the numeric timestamp
-        await projectStore.saveDocumentContent(id, editorTextRef.current);
+      //   // Save content and update the numeric timestamp
+      //   await projectStore.saveDocumentContent(id, editorTextRef.current);
         
-        events.emit("document:saved", { id });
+      //   events.emit("document:saved", { id });
         
-        // Refresh the local docs list to show the new 'updatedAt' time in the UI
-        const updatedList = await projectStore.listDocuments();
-        setDocs(updatedList.map(d => ({ ...d, id: d.id as ProjectDocumentId })));
-      },
+      //   // Refresh the local docs list to show the new 'updatedAt' time in the UI
+      //   const updatedList = await projectStore.listDocuments();
+      //   setDocs(updatedList.map(d => ({ ...d, id: d.id as ProjectDocumentId })));
+      // },
 
       getCurrent() {
         return currentDoc;
@@ -156,7 +172,7 @@ export default function App() {
       editor,
       actions: {
         requestOpenDocument: (id: ProjectDocumentId) => documents.open(id),
-        requestSaveDocument: () => documents.save(),
+        requestSaveDocument: (id: string, text: any) => documents.save(id, text),
         requestSetText: (text: string) => editor.setText(text),
         requestInsertText: (text: string) => editor.insertText(text)
       },
@@ -167,7 +183,17 @@ export default function App() {
         async set<T>(_key: string, _value: T) {}
       },
 
-      events
+      events: {
+        on<T>(event: string, handler: (payload: T) => void) {
+          return events.on(event, handler);
+        },
+        emit<T>(event: string, payload: T) {
+          events.emit(event, payload);
+        },
+        off<T>(event: string, handler: (payload: T) => void) {
+          // return events.off(event, handler);
+        }
+      }
     };
   }, [projectStore, events, currentDoc]);
 
@@ -175,6 +201,7 @@ export default function App() {
     const r = new PluginRuntime(api);
     r.registerModule(outline);
     r.registerModule(stats);
+    r.registerModule(quillEditor);
     r.rebuild();
     return r;
   }, [api]);

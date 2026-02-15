@@ -18,6 +18,7 @@
   "dependencies": {
     "@fontsource/roboto": "^5.2.9",
     "dexie": "^4.3.0",
+    "quill": "^2.0.3",
     "react-colorful": "^5.6.1"
   }
 }

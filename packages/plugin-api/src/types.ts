@@ -1,6 +1,6 @@
 import * as React from "react";
 
-export type SlotId = "leftSidebar" | "rightPanel" | "bottomPanel" | "toolbar" | "statusBar";
+export type SlotId = "leftSidebar" | "rightPanel" | "bottomPanel" | "toolbar" | "statusBar" | "mainPanel";
 
 export type DocumentSummary = { 
   id: string; 
@@ -8,9 +8,14 @@ export type DocumentSummary = {
   updatedAt: number; 
 };
 
+export type DocumentRecord = DocumentSummary & {
+  content: any; // The content
+};
+
 export type DocumentsApi = {
   list(): Promise<DocumentSummary[]>;
   getCurrent(): DocumentSummary | null;
+  getDocumentContent(id: string): Promise<string | null>;
   open(id: string): Promise<void>;
   
   /**
@@ -18,7 +23,7 @@ export type DocumentsApi = {
    * NOTE: Plugins should not call this directly.
    * Use ActionsApi.requestSaveDocument instead.
    */
-  save(): Promise<void>;
+  save(id: string, content: any): Promise<void>;
 };
 
 export interface PluginManifest {
@@ -98,7 +103,7 @@ export interface AppApi {
   };
   actions: {
     requestOpenDocument(id: ProjectDocumentId): void;
-    requestSaveDocument(): void;
+    requestSaveDocument(id: string, text: any): void;
     requestSetText(text: string): void;
     requestInsertText(text: string): void;
   };
