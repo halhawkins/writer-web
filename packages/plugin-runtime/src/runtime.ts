@@ -22,7 +22,9 @@ export class PluginRuntime {
     rightPanel: [],
     bottomPanel: [],
     toolbar: [],
-    statusBar: []
+    statusBar: [],
+    editorPanel: [],
+    projectPanel: [],
   };
 
   getState(): RuntimeState & { tick: number } {

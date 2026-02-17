@@ -108,7 +108,7 @@ export function register(api: AppApi) {
   api.workspace.addPanel({
     id: "quill-editor.panel",
     title: "Quill Editor",
-    slot: "mainPanel",
+    slot: "editorPanel",
     order: 10,
     render: () => <EditorPlugin api={api} />
   });

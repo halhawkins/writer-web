@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import type { PluginModule, AppApi } from "@writer/plugin-api";
+import type { ProjectDocumentId, PluginModule, AppApi } from "@writer/plugin-api";
 
 export const manifest: PluginModule["manifest"] = {
   id: "project-explorer",
@@ -101,7 +101,7 @@ function ProjectExplorerPanel(props: { api: AppApi }) {
               key={d.id}
               type="button"
               style={styles.listItem}
-              onClick={() => props.api.documents.open(d.id)}
+              onClick={() => props.api.actions.requestOpenDocument(d.id as ProjectDocumentId)}
               title={`Open: ${d.title}`}
             >
               <span style={styles.listIcon}>📄</span>
@@ -118,7 +118,7 @@ export function register(api: AppApi) {
   api.workspace.addPanel({
     id: "project-explorer.panel",
     title: "Project",
-    slot: "rightPanel",
+    slot: "projectPanel",
     order: 0,
     render: () => <ProjectExplorerPanel api={api} />
   });

@@ -5,6 +5,7 @@ import { PluginHost } from "@writer/plugin-host";
 
 import { plugin as outline } from "@writer/plugins-outline";
 import { plugin as stats } from "@writer/plugins-stats";
+import { plugin as projectExplorer } from "@writer/plugins-project-explorer";
 import { plugin as quillEditor } from "@writer/plugins-quill-editor";
 import { DexieProjectStore } from "@writer/plugin-runtime";
 import "./App.css";
@@ -202,6 +203,7 @@ export default function App() {
     r.registerModule(outline);
     r.registerModule(stats);
     r.registerModule(quillEditor);
+    r.registerModule(projectExplorer);
     r.rebuild();
     return r;
   }, [api]);

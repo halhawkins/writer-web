@@ -1,6 +1,6 @@
 import * as React from "react";
 
-export type SlotId = "leftSidebar" | "rightPanel" | "bottomPanel" | "toolbar" | "statusBar" | "mainPanel";
+export type SlotId = "leftSidebar" | "rightPanel" | "bottomPanel" | "toolbar" | "statusBar" | "mainPanel" | "editorPanel" | "projectPanel";
 
 export type DocumentSummary = { 
   id: string; 
