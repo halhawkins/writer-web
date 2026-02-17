@@ -86,8 +86,8 @@ function ProjectExplorerPanel(props: { api: AppApi }) {
               key={d.id}
               type="button"
               style={styles.gridItem}
-              onClick={() => props.api.documents.open(d.id)}
-              title={`Open: ${d.title}`}
+              onClick={() => props.api.actions.requestOpenDocument(d.id as ProjectDocumentId)}
+              title={`Open: ${d.title}`} 
             >
               <div style={styles.icon}>📄</div>
               <div style={styles.label}>{d.title}</div>
