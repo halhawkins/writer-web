@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import type { SlotId } from "@writer/plugin-api";
 import type { PluginRuntime } from "@writer/plugin-runtime";
-
+import "./PluginHost.css";
 type PanelCloseFn = () => void;
 
 type PanelFrameProps = {
@@ -124,7 +124,9 @@ export function PluginHost(props: {
   editorText: string;
   setEditorText: (text: string) => void;
 }) {
+  const [selectedMainSlot, setSelectedMainSlot] = React.useState("mainPanel");
   const state = props.runtime.getState();
+  const tabRef = useRef<(HTMLDivElement | null)[]>([]);
 
   const renderSlot = (slot: SlotId) =>
     state.panelsBySlot[slot].map((p) => {
@@ -135,11 +137,61 @@ export function PluginHost(props: {
         <div style={{ marginTop: 8 }}>{p.render({ close: () => {} }) as React.ReactNode}</div>
       </section>
     )});
+  const menuItems: React.CSSProperties = {
+    // transform: "rotate(-90deg)", 
+    background: "#ccc", 
+    padding: "0 12px",
+    textAlign: "center",
+    position: "relative",
+    right: "-30px",
+    cursor: "pointer",
+    boxShadow: "-4px -4px 4px #ccc",
+  }
+
+  useEffect(() => {
+    alert(`Tab clicked ${selectedMainSlot}`);
+  }, [setSelectedMainSlot])
+
+  const handleTabClick = (e: React.MouseEvent<HTMLDivElement>, selectedTab:string) => {
+    const target = e.target as HTMLDivElement;
+    console.log("Tab clicked", selectedTab);
+    setSelectedMainSlot(selectedTab);
+    tabRef.current.forEach(t => {
+    if (t) t.style.backgroundColor = "#ccc";});
+    target.style.backgroundColor = "#fff";
+  }
 
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "1fr 360px", height: "100vh" }}>
+    <div className="host-container" style={{flexDirection: "row"}}>
+      <div>
+      <div style={{
+        backgroundColor: "red", 
+        flexBasis: "2rem", 
+        display: "flex", 
+        width: "0", 
+        flexGrow: "0", 
+        flexShrink:"0", 
+        flexDirection: "row", 
+        gap: "2rem",
+        paddingTop: "2rem",
+        alignContent: "flex-end",
+        justifyContent: "flex-start",
+        left: "172px",
+        top: "541px",
+        position: "absolute",
+        alignItems: "flex-end",
+        transform: "rotate(-90deg)",
+        boxShadow: "0 3px 6px #444"
+        }}>
+        <div ref={el => tabRef.current[0] = el} className={selectedMainSlot==="projectPanel"?"tab-selected":"tab"} style={menuItems} onClick={(e) => handleTabClick(e, "projectPanel")}>Projects</div>
+        <div ref={el => tabRef.current[1] = el} className={selectedMainSlot==="editorPanel"?"tab-selected":"tab"} style={menuItems} onClick={(e) => handleTabClick(e, "editorPanel")}>Editor</div>
+        <div ref={el => tabRef.current[2] = el} className={selectedMainSlot==="timelinePanel"?"tab-selected":"tab"} style={menuItems} onClick={(e) => handleTabClick(e, "timelinePanel")}>Timeline</div>
+        <div ref={el => tabRef.current[3] = el} style={menuItems} onClick={(e) => handleTabClick(e, "settingsPanel")}>Settings</div>
+      </div>
+      </div>
+    <div style={{ display: "grid", gridTemplateColumns: "1fr 360px", height: "100vh", flexGrow: "1" }}>
       <main style={{ padding: 12, display: "grid", gridTemplateRows: "auto 1fr", gap: 12 }}>
-        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+        <div className="rowflex" style={{ display: "flex", gap: 8, alignItems: "center" }}>
           <label style={{ width: "250px"}}>
             Document:{" "}
             <select
@@ -158,7 +210,20 @@ export function PluginHost(props: {
           </label>
           <button>New Item</button>
         </div>
-        <div className="main-panel">{renderSlot("mainPanel")}</div>
+        <div className="main-panel">
+          {(() => {
+            switch (selectedMainSlot) {
+              case "projectPanel":
+                return renderSlot("projectPanel");
+              case "editorPanel":
+                return renderSlot("editorPanel");
+              case "timelinePanel":
+                return null;
+              default:
+                return null;
+            }
+          })()}
+        </div>
         
         {/* {renderSlot("rightPanel")} */}
 
@@ -170,9 +235,10 @@ export function PluginHost(props: {
       </main>
 
       <aside style={{ padding: 12, borderLeft: "1px solid #ddd" }}>
-        <h3>Right SPanel</h3>
+        <h3>Right Panel</h3>
         {renderSlot("rightPanel")}
       </aside>
+    </div>
     </div>
   );
 }
